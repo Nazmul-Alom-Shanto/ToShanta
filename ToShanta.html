@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram-like Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100&icon_names=favorite,home,search,settings,visibility,visibility_off" rel="stylesheet" />
+  
+    <style>
+       
+        * {
+            padding: 0;
+            margin: 0;
+        }
+        .overlay {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%; 
+            background: rgb(243, 143, 143); 
+            display: flex;
+            align-items: center;
+            justify-content: center;  
+        }
+        .overlay-content {
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 5px;
+            width: 80%;
+        }
+        .overlay-content h1 {
+            padding: 5px;
+            color: goldenrod;
+            font-size: 40px;
+        }
+        .overlay-content .pass {
+            width: 70%;
+        }
+        .overlay-content .pass input {
+            padding: 5px;
+            border-radius: 5px;
+            text-align: center;
+            width: 160%;
+            font-size: 18px;
+            color: #3eb627;
+        }
+        .overlay-content .pass input::placeholder {
+            font-size: 16px;
+            color: tomato;
+            opacity: 0.5;
+            text-align:center;
+        }
+        .overlay-content .pass button {
+            font-size: 30px;
+            position: absolute;
+            right: 5px;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+        .overlay-content .pass {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .overlay-content #enter {
+            padding: 5px 20px;
+            border-radius: 10px;
+            background: rgb(255, 0, 0);
+            color: #fff;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .pass-status {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(255, 0, 0, 0.8);
+            padding: 10px;
+            color: #fff;
+            z-index: 100;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: 100;
+            font-size: 19px;
+            transition: display 0.5s ease;
+            display: none;
+        }
+    
+    </style>
+</head>
+<body>
+   
+
+    <div class="pass-status">Your Inputed Password is Incorrect.</div>
+    <div class="overlay">
+        <div class="overlay-content">
+            <h1>Enter the Password</h1>
+            <div class="pass">
+                <input placeholder="Write Your Password Here" type="password" name="" id="passkey">
+                <button id="passkey-visibility" class="material-symbols-outlined">visibility</button>
+            </div>
+            <button id="enter">Enter</button>
+        </div>
+    </div>
+
+   
+    <script>
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+        }
+
+        const correctPasswordHash = "c15f176ee72389953efea962df8087a1bbfd0e9e49690f6b5e6250c1b5ec980f"; // Pre-hashed password: "shantashanta"
+        console.log("corr Hash",correctPasswordHash);
+        
+        document.getElementById("enter").addEventListener("click", async () => {
+            const PasswordInput = document.getElementById("passkey");
+            const PasswordValue = PasswordInput.value;
+            const enterButton = document.getElementById("enter");
+
+            if (PasswordValue.trim() === '') {
+                return;
+            }
+
+            const enteredHash = await hashPassword(PasswordValue.trim());
+            console.log("enetred Hash", enteredHash);
+
+            if (enteredHash === correctPasswordHash) {
+                document.querySelector(".overlay").style.display = "none";
+            } else {
+                PasswordInput.value = ''; 
+                const Status = document.querySelector(".pass-status");
+                Status.style.display = "block";
+                setTimeout(function() {
+                    Status.style.display = "none";
+                }, 1000);
+            }
+        });
+
+        document.getElementById("passkey-visibility").addEventListener("click", () => {
+            const PasswordInput = document.getElementById("passkey");
+            const VisibilityButton = document.getElementById("passkey-visibility");
+
+            PasswordInput.type = PasswordInput.type === "password" ? "text" : "password";
+            VisibilityButton.innerText = VisibilityButton.innerText === "visibility" ? "visibility_off" : "visibility";
+        });
+
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                const enterBTN = document.getElementById("enter");
+                if (enterBTN.disabled !== true) {
+                    enterBTN.click();
+                } else {
+                sendMessage();
+                }
+            }
+        });
+        document.addEventListener("DOMContentLoaded", () => {
+            const passwordInput = document.getElementById("passkey");
+            if (passwordInput) {
+                passwordInput.focus(); // Set focus on the password input
+            }
+        });
+
+    </script>
+</body>
+</html>
